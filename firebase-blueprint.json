@@ -1,0 +1,71 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Application user profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "description": "Full name" },
+        "email": { "type": "string", "description": "Email address" },
+        "role": { "type": "string", "enum": ["admin", "student", "trainer"], "description": "User role" },
+        "batch": { "type": "string", "description": "Assigned batch (for students)" },
+        "avatar": { "type": "string", "description": "Profile picture URL" }
+      },
+      "required": ["uid", "name", "email", "role"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "Learning session",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "trainer": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "duration": { "type": "string" },
+        "batch": { "type": "string" },
+        "type": { "type": "string", "enum": ["online", "offline"] },
+        "link": { "type": "string" },
+        "location": { "type": "string" },
+        "attendees": { "type": "number" }
+      },
+      "required": ["title", "date", "batch"]
+    },
+    "Assignment": {
+      "title": "Assignment",
+      "description": "Student assignment",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "batch": { "type": "string" },
+        "type": { "type": "string", "enum": ["coding", "theory"] },
+        "dueDate": { "type": "string" },
+        "submissions": { "type": "number" },
+        "total": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "graded"] }
+      },
+      "required": ["title", "batch", "dueDate"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Daily student task",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "title": { "type": "string" },
+        "batch": { "type": "string" },
+        "deadline": { "type": "string" },
+        "status": { "type": "string", "enum": ["todo", "in-progress", "completed"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] }
+      },
+      "required": ["uid", "title", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/sessions/{sessionId}": { "schema": "Session", "description": "Learning sessions" },
+    "/assignments/{assignmentId}": { "schema": "Assignment", "description": "Assignments" },
+    "/tasks/{taskId}": { "schema": "Task", "description": "Daily tasks" }
+  }
+}

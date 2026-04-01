@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #f97316; /* Orange-500 */
+  --color-primary-dark: #ea580c; /* Orange-600 */
+  --color-surface: #ffffff;
+  --color-background: #f8fafc;
+  --color-text-main: #0f172a;
+  --color-text-muted: #64748b;
+}
+
+body {
+  @apply bg-background text-text-main font-sans;
+}
+
+.glass-panel {
+  @apply bg-white/80 backdrop-blur-md border border-slate-200 shadow-sm;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-all font-medium;
+}
+
+.sidebar-link {
+  @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-text-muted hover:bg-primary/10 hover:text-primary;
+}
+
+.sidebar-link.active {
+  @apply bg-primary text-white shadow-lg shadow-primary/20;
+}
