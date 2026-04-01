@@ -1,20 +1,50 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+## 🚀 Vertex Student Trainer Platform
 
-# Run and deploy your AI Studio app
+Vertex Student Trainer Platform is a modern learning and task management system developed using React for the frontend and Node.js for the backend. It integrates MongoDB for database management and Firebase for authentication and real-time features.
 
-This contains everything you need to run your app locally.
+The platform is designed for three main roles: 👨‍💼 Administrator, 👨‍🏫 Trainer, and 🎓 Student.
 
-View your app in AI Studio: https://ai.studio/apps/fb14c803-14af-4135-8601-0e0a31ab1cae
+* Administrators can manage users and system settings
+* Trainers can upload lectures and assign daily tasks
+* Students can access learning materials and track their progress
 
-## Run Locally
+✨ **Key Features:**
 
-**Prerequisites:**  Node.js
+* 📚 Lecture Management
+* 📝 Daily Task Tracking
+* 🔐 Role-Based Authentication
+* ⚡ Real-Time Updates
 
+The system is scalable, user-friendly, and built to enhance collaboration and learning efficiency.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+---
+
+## 🛠️ Run Locally
+
+### ✅ Prerequisites
+
+* 🟢 Node.js installed
+
+### 📦 Installation
+
+```bash
+npm install
+```
+
+### 🔑 Environment Setup
+
+Create a `.env.local` file and add:
+
+```env
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+### ▶️ Run the App
+
+```bash
+npm run dev
+```
+
+---
+
+💡 Your app will be running locally and ready to use!
