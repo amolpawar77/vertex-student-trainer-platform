@@ -15,48 +15,16 @@ import Assignments from './pages/Assignments';
 import Tasks from './pages/Tasks';
 import Login from './pages/Login';
 
-import { onAuthStateChanged, auth, db, doc, getDoc, signOut } from './firebase';
-
-// Mock Auth State
 const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (userDoc.exists()) {
-            setUser(userDoc.data());
-          } else {
-            // Fallback for mock users or if profile creation failed
-            setUser({
-              uid: firebaseUser.uid,
-              name: firebaseUser.displayName || 'User',
-              email: firebaseUser.email || '',
-              role: 'student'
-            });
-          }
-        } catch (err) {
-          console.error("Error fetching user profile:", err);
-        }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    setLoading(false);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setUser(null);
-    } catch (err) {
-      console.error("Logout Error:", err);
-    }
+  const handleLogout = () => {
+    setUser(null);
   };
 
   if (loading) {
@@ -86,7 +54,7 @@ const App: React.FC = () => {
               <Route path="/candidates" element={<Candidates />} />
               <Route path="/sessions" element={<Sessions />} />
               <Route path="/assignments" element={<Assignments />} />
-              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/tasks" element={<Tasks currentUser={user} />} />
               
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

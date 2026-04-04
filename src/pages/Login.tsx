@@ -4,11 +4,10 @@ import {
   Lock, 
   ArrowRight, 
   Github, 
-  Chrome,
   AlertCircle,
   User
 } from 'lucide-react';
-import { auth, googleProvider, signInWithPopup, db, doc, getDoc, setDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '../firebase';
+import { authLogin, authSignup } from '../api';
 
 interface LoginProps {
   onLogin: (user: any) => void;
@@ -23,40 +22,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [selectedRole, setSelectedRole] = useState<'student' | 'trainer'>('student');
   const [isSignUp, setIsSignUp] = useState(false);
 
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      
-      // Check if user exists in Firestore
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      
-      if (!userDoc.exists()) {
-        // Create new user profile with selected role
-        const newUser = {
-          uid: user.uid,
-          name: user.displayName || 'New User',
-          email: user.email || '',
-          role: selectedRole, // Use selected role
-          avatar: user.photoURL || '',
-          batch: selectedRole === 'student' ? 'Unassigned' : 'N/A',
-          createdAt: new Date().toISOString()
-        };
-        await setDoc(doc(db, 'users', user.uid), newUser);
-        onLogin(newUser);
-      } else {
-        onLogin(userDoc.data());
-      }
-    } catch (err: any) {
-      console.error("Google Login Error:", err);
-      setError(err.message || 'Failed to sign in with Google');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -64,43 +29,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
     try {
       if (isSignUp) {
-        // Sign Up Logic
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        const user = result.user;
-        
-        const newUser = {
-          uid: user.uid,
+        const payload = {
+          email,
+          password,
           name: name || email.split('@')[0],
-          email: user.email || email,
           role: selectedRole,
-          avatar: '',
-          batch: selectedRole === 'student' ? 'Unassigned' : 'N/A',
-          createdAt: new Date().toISOString()
         };
-        await setDoc(doc(db, 'users', user.uid), newUser);
-        onLogin(newUser);
+        const response = await authSignup(payload);
+        onLogin(response.data.record);
       } else {
-        // Login Logic
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        const user = result.user;
-        
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          onLogin(userDoc.data());
-        } else {
-          // If profile doesn't exist, create a basic one
-          const newUser = {
-            uid: user.uid,
-            name: user.displayName || email.split('@')[0],
-            email: user.email || email,
-            role: 'student',
-            avatar: '',
-            batch: 'Unassigned',
-            createdAt: new Date().toISOString()
-          };
-          await setDoc(doc(db, 'users', user.uid), newUser);
-          onLogin(newUser);
-        }
+        const response = await authLogin(email, password);
+        onLogin(response.data.record);
       }
     } catch (err: any) {
       console.error("Auth Error:", err);
@@ -237,30 +176,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          <div className="mt-8">
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-100"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase font-bold text-slate-400">
-                <span className="bg-white px-4">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-                className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all font-bold text-sm text-slate-600"
-              >
-                <Chrome size={18} />
-                Google
-              </button>
-              <button className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all font-bold text-sm text-slate-600">
-                <Github size={18} />
-                GitHub
-              </button>
-            </div>
+          <div className="mt-8 text-sm text-slate-500">
+            Use your email and password to sign in or create an account.
           </div>
         </div>
 

@@ -11,8 +11,7 @@ import {
   ChevronRight,
   MoreHorizontal
 } from 'lucide-react';
-import { db, collection, onSnapshot, auth } from '../firebase';
-import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
+import { getSessions } from '../api';
 
 const Sessions: React.FC = () => {
   const [view, setView] = useState<'list' | 'calendar'>('list');
@@ -20,21 +19,14 @@ const Sessions: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-
-    const path = 'sessions';
-    const unsubscribe = onSnapshot(collection(db, path), (snapshot) => {
-      const sessionsList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setSessions(sessionsList);
-      setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, path);
-    });
-
-    return () => unsubscribe();
+    getSessions()
+      .then((response) => {
+        setSessions(response.data.records || []);
+      })
+      .catch((error) => {
+        console.error('Sessions load failed:', error);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (

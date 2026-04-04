@@ -10,33 +10,31 @@ import {
   Filter,
   Users
 } from 'lucide-react';
-import { db, collection, onSnapshot, query, where, auth } from '../firebase';
-import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
+import { getTasks } from '../api';
 
-const Tasks: React.FC = () => {
+interface TasksProps {
+  currentUser: any;
+}
+
+const Tasks: React.FC<TasksProps> = ({ currentUser }) => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-
-    const path = 'tasks';
-    // Students see only their tasks, admins see all (handled by rules, but query helps)
-    const q = query(collection(db, path), where('uid', '==', auth.currentUser.uid));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const tasksList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setTasks(tasksList);
+    if (!currentUser?.uid) {
       setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, path);
-    });
+      return;
+    }
 
-    return () => unsubscribe();
-  }, []);
+    getTasks(currentUser.uid)
+      .then((response) => {
+        setTasks(response.data.records || []);
+      })
+      .catch((error) => {
+        console.error('Tasks load failed:', error);
+      })
+      .finally(() => setLoading(false));
+  }, [currentUser]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {

@@ -8,8 +8,7 @@ import {
   ArrowDownRight,
   Clock,
 } from 'lucide-react';
-import { db, collection, onSnapshot, query, where, limit, auth } from '../firebase';
-import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
+import { getDashboard } from '../api';
 
 const Dashboard: React.FC = () => {
   const [stats, setStats] = useState([
@@ -23,40 +22,15 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) {
-      setLoading(false);
-      return;
-    }
-
-    // Fetch Stats (Simplified for now)
-    const unsubUsers = onSnapshot(query(collection(db, 'users'), where('role', '==', 'student')), (snap) => {
-      setStats(prev => prev.map(s => s.label === 'Total Candidates' ? { ...s, value: String(snap.size) } : s));
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'users');
-    });
-
-    const unsubSessions = onSnapshot(collection(db, 'sessions'), (snap) => {
-      setStats(prev => prev.map(s => s.label === 'Active Sessions' ? { ...s, value: String(snap.size) } : s));
-      
-      const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setUpcomingSessions(list.slice(0, 3));
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'sessions');
-    });
-
-    const unsubAssignments = onSnapshot(collection(db, 'assignments'), (snap) => {
-      setStats(prev => prev.map(s => s.label === 'Assignments' ? { ...s, value: String(snap.size) } : s));
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'assignments');
-    });
-
-    setLoading(false);
-
-    return () => {
-      unsubUsers();
-      unsubSessions();
-      unsubAssignments();
-    };
+    getDashboard()
+      .then((response) => {
+        setStats(response.data.stats || stats);
+        setUpcomingSessions(response.data.upcomingSessions || []);
+      })
+      .catch((error) => {
+        console.error('Dashboard load failed:', error);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (

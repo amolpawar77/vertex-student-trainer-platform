@@ -10,8 +10,7 @@ import {
   MoreVertical,
   Eye
 } from 'lucide-react';
-import { db, collection, onSnapshot, auth } from '../firebase';
-import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
+import { getAssignments } from '../api';
 
 const Assignments: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'active' | 'graded'>('all');
@@ -19,21 +18,14 @@ const Assignments: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-
-    const path = 'assignments';
-    const unsubscribe = onSnapshot(collection(db, path), (snapshot) => {
-      const assignmentsList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setAssignments(assignmentsList);
-      setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, path);
-    });
-
-    return () => unsubscribe();
+    getAssignments()
+      .then((response) => {
+        setAssignments(response.data.records || []);
+      })
+      .catch((error) => {
+        console.error('Assignments load failed:', error);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (

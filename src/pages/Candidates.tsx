@@ -6,8 +6,7 @@ import {
   Filter, 
   MoreVertical, 
 } from 'lucide-react';
-import { db, collection, onSnapshot, query, where, auth } from '../firebase';
-import { handleFirestoreError, OperationType } from '../lib/firestoreUtils';
+import { getUsers } from '../api';
 
 const Candidates: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,23 +14,14 @@ const Candidates: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
-
-    const path = 'users';
-    const q = query(collection(db, path), where('role', '==', 'student'));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const usersList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setCandidates(usersList);
-      setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, path);
-    });
-
-    return () => unsubscribe();
+    getUsers('student')
+      .then((response) => {
+        setCandidates(response.data.records || []);
+      })
+      .catch((error) => {
+        console.error('Candidates load failed:', error);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
